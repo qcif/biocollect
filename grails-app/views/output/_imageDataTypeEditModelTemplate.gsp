@@ -124,8 +124,8 @@
         </tr>
         <tr>
             <td class="span4">
-                <span class="btn-small btn-success fileinput-button"><i class="fa fa-plus"></i> <input type="file" accept="image/*" name="files" ${validationAttrs?'data-validation-engine="data-validate[groupRequired['+source+']]"':''} ><span>Add files</span>
-                </span>
+                  <span class="btn-small btn-success fileinput-button" ><i class="fa fa-plus"></i> <input id="uploadingphoto" class="controls" type="file" accept="image/*" name="files" ${validationAttrs?'data-validation-engine="data-validate[groupRequired['+source+']]"':''} ><span>Add files</span>
+                </span><span id="erroronuploadingphoto"></span>
             </td>
             <td>
                 <div class="dropzone span12">
