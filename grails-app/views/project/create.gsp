@@ -135,6 +135,15 @@ $(function(){
                         } else {
                             document.location.href = "${createLink(action: 'newProjectIntro')}/" + projectId;
                         }
+                    },function(error){
+                        if (error.status){
+                            var errormsg = "Unexpected excpetion occurred: "+ error.status +", please see console logs";
+                            console.log(error.responseText);
+                            bootbox.alert(errormsg);
+
+                        }else{
+                            bootbox.alert(error, function() {});
+                         }
                     });
                 } else {
                     bootbox.alert(projectErrors);
