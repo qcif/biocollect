@@ -138,11 +138,10 @@ $(function(){
                     },function(error){
                         if (error.status){
                             var errormsg = "Unexpected excpetion occurred: "+ error.status +", please see console logs";
-                            console.log(error.responseText);
-                            bootbox.alert(errormsg);
+                            bootbox.alert(errormsg,function(){console.log(error.responseText);});
 
                         }else{
-                            bootbox.alert(error, function() {});
+                            bootbox.alert(error, function() {console.log(error)});
                          }
                     });
                 } else {
