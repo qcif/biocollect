@@ -225,7 +225,7 @@ function stringToDate(date) {
             }
 
             //initialize datepicker with some optional options
-            var datePickerConfig = {format: 'dd-mm-yyyy', autoclose: true};
+            var datePickerConfig = {format: 'dd-mm-yyyy', autoclose: true,clearBtn: true};
             if (allBindingsAccessor().datePickerOptions) {
                 $.extend(datePickerConfig, allBindingsAccessor().datePickerOptions);
             }
@@ -236,6 +236,11 @@ function stringToDate(date) {
             $element.parent().find('.open-datepicker').click(function () {
                 $element.datepicker('show');
             });
+            $element.parent().find('.clear-date').click(function () {
+                $(this).siblings('input').val('');
+                $(this).siblings('input').change();
+            });
+
 
             var changeHandler = function(event) {
                 var value = valueAccessor();
@@ -265,10 +270,17 @@ function stringToDate(date) {
                 widget.date = date;
                 if (!isNaN(widget.date) ) {
                     widget.setDate(widget.date);
+                }else{
+                    console.log('reset')
                 }
             }
+        },
+
+        removeCurrentDate:function(element,valueAccessor){
+
         }
     };
+
 
 }());
 

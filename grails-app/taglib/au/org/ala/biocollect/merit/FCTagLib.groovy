@@ -134,7 +134,7 @@ class FCTagLib {
                 class: attrs.size ?: 'input-xlarge'
             ]
 
-            def ignoreList = ['name', 'id']
+            def ignoreList = ['name', 'id','nullable']
             attrs.each {
                 if (!ignoreList.contains(it.key)) {
                     inputAttrs[it.key] = it.value
@@ -151,6 +151,14 @@ class FCTagLib {
                 mb.span(class:'add-on open-datepicker') {
                     mb.i(class:'icon-calendar') {
                         mkp.yieldUnescaped("&nbsp;")
+                    }
+                }
+
+                if (attrs.clearBtn){
+                    mb.span(class:'add-on clear-date') {
+                        mb.i(class: 'icon-remove') {
+                            mkp.yieldUnescaped("&nbsp;")
+                        }
                     }
                 }
             };
