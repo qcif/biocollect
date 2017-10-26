@@ -725,7 +725,6 @@ ko.bindingHandlers.fancybox = {
     config = $.extend({
       width: 700,
       height: 500,
-      padding: 0,
       // fix for bringing the modal dialog to focus to make it accessible via keyboard.
       afterShow: function(){
         $('.fancybox-wrap').focus();
