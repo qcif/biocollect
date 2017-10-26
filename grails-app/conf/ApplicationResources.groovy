@@ -596,4 +596,8 @@ modules = {
         dependsOn 'jquery', 'autocomplete'
         resource url:[plugin: 'ala-bootstrap2', dir: 'js',file:'html5.js'], wrapper: { s -> "<!--[if lt IE 9]>$s<![endif]-->" }
     }
+
+    utils {
+        resource url: 'js/utils.js'
+    }
 }

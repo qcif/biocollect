@@ -1,4 +1,5 @@
 /**
+ *
  * Attaches a bootstrap popover to the bound element.  The details for the popover should be supplied as the
  * value of this binding.
  * e.g.  <a href="#" data-bind="popover: {title:"Popover title", content:"Popover content"}>My link with popover</a>
@@ -739,6 +740,11 @@ ko.bindingHandlers.fancybox = {
         }
       }
     }, config);
+
+    if (detectmob()){
+        config.width='100%';
+        config.padding=[0,0,0,0];
+    }
 
     if($elem.attr('target') == 'fancybox'){
       $elem.fancybox(config);
