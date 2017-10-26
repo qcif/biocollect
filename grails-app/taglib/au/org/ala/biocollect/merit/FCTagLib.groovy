@@ -134,7 +134,7 @@ class FCTagLib {
                 class: attrs.size ?: 'input-xlarge'
             ]
 
-            def ignoreList = ['name', 'id','nullable']
+            def ignoreList = ['name', 'id','clearBtn']
             attrs.each {
                 if (!ignoreList.contains(it.key)) {
                     inputAttrs[it.key] = it.value
