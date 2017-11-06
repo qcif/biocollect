@@ -328,7 +328,7 @@ function ProjectViewModel(project, isUserEditor) {
     self.funding = ko.computed(function(){
         var total = 0;
         ko.utils.arrayForEach(self.fundings() ,function(funding){
-            total += funding.fundingSourceAmount();
+            total += parseFloat(funding.fundingSourceAmount(),2);
         })
         return total;
     }).extend({currency:{currencySymbol:"AUD $ "}})
