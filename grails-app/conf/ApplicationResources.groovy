@@ -499,6 +499,7 @@ modules = {
     }
     
     activities{
+        dependsOn 'utils'
         resource url: 'css/activities.css'
         resource url: 'css/map.css'
     }

@@ -741,7 +741,7 @@ ko.bindingHandlers.fancybox = {
       }
     }, config);
 
-    if (detectmob()){
+    if (utils.detectmob()){
         config.width='100%';
         config.padding=[0,0,0,0];
     }
