@@ -276,9 +276,7 @@ function stringToDate(date) {
             }
         },
 
-        removeCurrentDate:function(element,valueAccessor){
 
-        }
     };
 
 
