@@ -154,7 +154,7 @@ class FCTagLib {
                     }
                 }
 
-                if (attrs.clearBtn){
+                if (attrs.clearBtn?.toBoolean()){
                     mb.span(class:'add-on clear-date') {
                         mb.i(class: 'icon-remove') {
                             mkp.yieldUnescaped("&nbsp;")
