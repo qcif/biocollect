@@ -47,17 +47,18 @@ import groovyx.net.http.ContentType
 
 class Globals {
     // IMPORTANT CONFIGURATION
-    static DEBUG_AND_VALIDATE = true;
+    static DEBUG_AND_VALIDATE = false;
     static PROJECT_ID = "abdd9f05-a757-420b-85a6-3e8ae31c2d4f"
 
     static USERNAME = "qifeng.bai@csiro.au" // 510
     static AUTH_KEY = "889543c1-14ce-4d2d-a1f2-a43b19924ae8"
 
-    static PROJECT_ACTIVITY_ID = "6eaf8817-3fb3-432b-add9-ede12824c241"
+    static PROJECT_ACTIVITY_ID = "016eb7f9-6a9c-4526-bdb7-c3c273304c7b"
     static IMAGES_PATH = "images//Varanus_varius//"
     static DATA_TEMPLATE_FILE = "data_template_current_surveys.json"
 
     static SERVER_URL = "http://devt.ala.org.au:8087/biocollect"
+    static SPECIES_URL = "https://biocollect.ala.org.au/search/searchSpecies/${PROJECT_ACTIVITY_ID}?limit=1&hub=ala"
     //static ADD_NEW_ACTIVITY_URL = "/ws/bioactivity/save?pActivityId=${PROJECT_ACTIVITY_ID}"
     static ADD_NEW_ACTIVITY_URL = "/bioActivity/ajaxUpdate?pActivityId=${PROJECT_ACTIVITY_ID}"
     static IMAGE_UPLOAD_URL = 'http://devt.ala.org.au:8087/biocollect/ws/attachment/upload'
@@ -71,6 +72,24 @@ static void main(String[] args) {
     String DATA_FILE = "Wolli - cboc surveys - processed - for loading.xls"
     String DATA_TEMPLATE_FILE = "data_template_CBOC_surveys.json"
     String SITE_LOG_FILE = Globals.PROJECT_ID+".site.log"
+
+    if (args && args[0] == 'prod') {
+        println('We are uploading to the production server? Y/N')
+        def answer = System.in.newReader().readLine()
+
+        if (!(answer == 'Y' || answer == 'y')) {
+            println('Stop!')
+            System.exit(0)
+        } else {
+            println 'Uploading to prod........'
+            Globals.DEBUG_AND_VALIDATE = false;
+            Globals.USERNAME = 'dlutherau@yahoo.com.au'
+            Globals.AUTH_KEY = "9601eeee-3c9b-4f24-b4db-5fea68e13c79"
+            Globals.SERVER_URL = 'https://biocollect.ala.org.au'
+            Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
+            SITE_LOG_FILE = Globals.PROJECT_ID + ".prod.site.log"
+        }
+    }
 
     //Create sites without duplciation
     def SITES = loadSites(SITE_LOG_FILE)
@@ -96,7 +115,24 @@ static void main(String[] args) {
 
 }
 
+    String tryFormat(String datetime)
+    {
+        List<String> formatStrings = Arrays.asList("yyyy-MM-dd'T'HH:mm:ss'Z'", "dd/MM/yyyy","yyyy-MM-dd'T'HH:mm");
+        for (String formatString : formatStrings)
+        {
+            try
+            {
+                TimeZone tz = TimeZone.getTimeZone("UTC");
+                java.text.DateFormat df = new java.text.SimpleDateFormat(formatString);
+                // Quoted "Z" to indicate UTC, no timezone offset
+                df.setTimeZone(tz);
+                return df.format(datetime);
+            }
+            catch (Exception e) {}
+        }
 
+        throw new Exception("Cannot recognize: " + datetime);
+    }
 
 
 
@@ -112,18 +148,14 @@ static void main(String[] args) {
 
         // Loop through the activities
         activities?.eachWithIndex { activityRow, activityIndex ->
-            if (activityIndex >= 0) { // 183
+            if (activityIndex >=10) { // 183
                 record = activityRow
                 def jsonSlurper = new groovy.json.JsonSlurper()
                 def activity = jsonSlurper.parseText(jsonStr)
 
 
                 activity.projectId = Globals.PROJECT_ID
-                //activity.name =
-
-                println("-----START----")
-                println(record.RECORD_ID)
-                //Convert Date to UTC date.
+                  //Convert Date to UTC date.
                 TimeZone tz = TimeZone.getTimeZone("UTC");
                 java.text.DateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                 // Quoted "Z" to indicate UTC, no timezone offset
@@ -136,12 +168,25 @@ static void main(String[] args) {
                 try {
                     isoDate = df.format(record.surveyStartDate);
                     //isoDateTime = '12:00 AM' //record."surveyStartTime" ? time.format(record."surveyStartTime") : ''
-                    isoDateTime = time.format(record.surveyStartTime)
+                    if (record.surveyStartTime)
+                        isoDateTime = time.format(record.surveyStartTime)
+                    if (record.surveyFinishDate)
+                       isoFinishDate = df.format(record.surveyFinishDate)
 
-                    isoFinishDate = df.format(record.surveyFinishDate);
-                    isoFinishTime = time.format(record.surveyFinishTime);
+                    if (record.surveyFinishTime)
+                        if(record.surveyFinishTime instanceof String) {
+                            java.text.DateFormat t = new java.text.SimpleDateFormat("hh:mm");
+                            isoFinishTime= time.format(t.parse(record.surveyFinishTime))
+                            println("${isoFinishTime} is obtained by parsing String")
+                        }else
+                            isoFinishTime =  time.format(record.surveyFinishTime)
+
                 } catch (Exception ex) {
-                    println("Date format error ${activityIndex} >>  >> ${record.surveyStartTime}")
+                    println( " ${activityIndex}th date/time format cannot be recognized")
+                    println( record.surveyFinishTime.getClass() )
+                    println(ex)
+                    ex.printStackTrace()
+                    System.exit(1)
                 }
 
 
@@ -240,17 +285,54 @@ static void main(String[] args) {
 
                 activity.outputs[0].data.speciesSightings =[]
                 def speciesSighting = [:]
-                speciesSighting['individualCount'] =record.individualCount? (int) Float.parseFloat(record.individualCount):1
+                speciesSighting['sightingComments'] = record.sightingComments?record.sightingComments:''
+                int individualCount = record.individualCount? (int) Float.parseFloat(record.individualCount):1
+                if (individualCount == 0 )
+                    speciesSighting['individualCount'] = 1
+                else
+                    speciesSighting['individualCount'] = individualCount
+
+
                 speciesSighting['abundanceCode'] = record.abundanceCode
                 speciesSighting['breedingStatus'] = insertSpaces(record.breedingStatus)
                 speciesSighting['habitatCode'] = insertSpaces(record.habitatCode)
-                speciesSighting['sightingComments'] = record.sightingComments
                 speciesSighting['raouNumber'] = record.raouNumber
 
 
-                speciesSighting['species'] = [:]
-                speciesSighting['species']['name'] = record.species
-                speciesSighting['species']['commonName'] = record.commonName
+
+                if(record.species){
+                    def species = [:]
+                    speciesSighting['species'] = species
+                    species['name'] = record.species
+                    species['commonName'] = record.commonName
+
+                    String encodedSurveyName = java.net.URLEncoder.encode(activity.outputs[0].name)
+                    String encodedSpecies = java.net.URLEncoder.encode(record.'species')
+
+                    // Get Unique Species Id
+                    def uniqueIdResponse = new URL(Globals.SERVER_URL + "/ws/species/uniqueId")?.text
+                    def jsonResponse = new groovy.json.JsonSlurper()
+                    def outputSpeciesId = jsonResponse.parseText(uniqueIdResponse)?.outputSpeciesId
+                    species['outputSpeciesId'] = outputSpeciesId
+
+
+                    def speciesResponse = new URL(Globals.SPECIES_URL + "&q=${encodedSpecies}&output=${encodedSurveyName}&dataFieldName=species").text
+                    def speciesJSON = new groovy.json.JsonSlurper()
+                    def autoCompleteList = speciesJSON.parseText(speciesResponse)?.autoCompleteList
+                      if (!autoCompleteList) {
+                        species.name = record.'species'
+                    }
+
+                    autoCompleteList?.eachWithIndex { item, index ->
+                        if (index == 0) {
+                            species.name = item.name
+                            species.guid = item.guid
+                            species.scientificName = item.scientificName
+                            species.commonName = item.commonName
+                        }
+                    }
+                }
+
 
 
 
@@ -265,30 +347,27 @@ static void main(String[] args) {
 
                 if (Globals.DEBUG_AND_VALIDATE) {
                     println(new groovy.json.JsonBuilder( activity ).toString())
-                    System.exit(0)
+                    //System.exit(0)
                 }
 
-                String createdActivityId = postRecord(activity)
+                String createdActivityId
+                createdActivityId = postRecord(activity)
 
                 if (createdActivityId){
                     if (Globals.DEBUG_AND_VALIDATE){
                         println(createdActivityId)
                     }
-                    recordsLog << createdActivityId +'\n'
+                    recordsLog << Globals.SERVER_URL +'/bioActivity/index/' + createdActivityId +'\n'
 
                 }else{
                     println('Error in creating records. System aborted')
-                    System.exit(0)
+                    System.exit(1)
                 }
 
-                System.exit(0)
-
-
-
+                print ("${activityIndex}th record created ")
+                createdActivityId ? println(" : ${createdActivityId}") : println()
             }
         }
-
-
     }
 
 

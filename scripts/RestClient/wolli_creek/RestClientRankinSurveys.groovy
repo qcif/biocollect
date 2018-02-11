@@ -48,7 +48,7 @@ import groovyx.net.http.ContentType
 
 class Globals {
     // IMPORTANT CONFIGURATION
-    static DEBUG_AND_VALIDATE = true;
+    static DEBUG_AND_VALIDATE = false;
     static PROJECT_ID = "abdd9f05-a757-420b-85a6-3e8ae31c2d4f"
 
     static USERNAME = "qifeng.bai@csiro.au" // 510
@@ -56,13 +56,11 @@ class Globals {
 
     static PROJECT_ACTIVITY_ID = "4be25c89-2ba4-4d45-9f1d-6a10502b54f3"
     static IMAGES_PATH = "images//Varanus_varius//"
-    static DATA_TEMPLATE_FILE = "data_template_Neil_Rankin_Surveys.json"
-
     static SERVER_URL = "http://devt.ala.org.au:8087/biocollect"
+    static SPECIES_URL = "https://biocollect.ala.org.au/search/searchSpecies/${PROJECT_ACTIVITY_ID}?limit=1&hub=ala"
     //static ADD_NEW_ACTIVITY_URL = "/ws/bioactivity/save?pActivityId=${PROJECT_ACTIVITY_ID}"
     static ADD_NEW_ACTIVITY_URL = "/bioActivity/ajaxUpdate?pActivityId=${PROJECT_ACTIVITY_ID}"
     static IMAGE_UPLOAD_URL = 'http://devt.ala.org.au:8087/biocollect/ws/attachment/upload'
-    //def IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
     static SITE_CREATION_URL = '/site/ajaxUpdate'
 }
 
@@ -73,21 +71,29 @@ static void main(String[] args) {
     String DATA_TEMPLATE_FILE = "data_template_Neil_Rankin_Surveys.json"
     String SITE_LOG_FILE = Globals.PROJECT_ID+".site.log"
 
+    if (args && args[0] == 'prod') {
+        println('We are uploading to the production server? Y/N')
+        def answer = System.in.newReader().readLine()
+
+        if (!(answer == 'Y' || answer == 'y')) {
+            println('Stop!')
+            System.exit(0)
+        } else {
+            println 'Uploading to prod........'
+            Globals.DEBUG_AND_VALIDATE = false;
+            Globals.USERNAME = 'dlutherau@yahoo.com.au'
+            Globals.AUTH_KEY = "9601eeee-3c9b-4f24-b4db-5fea68e13c79"
+            Globals.SERVER_URL = 'https://biocollect.ala.org.au'
+            Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
+            SITE_LOG_FILE = Globals.PROJECT_ID + ".prod.site.log"
+        }
+    }
+
     //Create sites without duplciation
     def SITES = loadSites(SITE_LOG_FILE)
     def activities = loadXsl(DATA_FILE)
     println("Total activities to upload = ${activities?.size()}")
     SITES = createSites(activities, SITES,SITE_LOG_FILE)
-
-//    println ('Check if sites were created successfully?  Y/N')
-//    def answer = System.in.newReader().readLine()
-//
-//    if (!(answer == 'Y' || answer == 'y'  )){
-//        println ('Stop!')
-//        System.exit(0)
-//    }else{
-//        println 'Continue........'
-//    }
 
     createRecords(activities, SITES, DATA_TEMPLATE_FILE)
 
@@ -111,15 +117,12 @@ static void main(String[] args) {
 
         // Loop through the activities
         activities?.eachWithIndex { activityRow, activityIndex ->
-
+            if (activityIndex >=10) {
                 record = activityRow
                 def jsonSlurper = new groovy.json.JsonSlurper()
                 def activity = jsonSlurper.parseText(jsonStr)
                 activity.projectId = Globals.PROJECT_ID
-                //activity.name =
 
-                println("-----START----")
-                println(record.RECORD_ID)
                 //Convert Date to UTC date.
                 TimeZone tz = TimeZone.getTimeZone("UTC");
                 java.text.DateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -133,15 +136,27 @@ static void main(String[] args) {
                 try {
                     isoDate = df.format(record.surveyStartDate);
                     //isoDateTime = '12:00 AM' //record."surveyStartTime" ? time.format(record."surveyStartTime") : ''
-                    isoDateTime = time.format(record.surveyStartTime)
+                    if (record.surveyStartTime)
+                        isoDateTime = time.format(record.surveyStartTime)
+                    if (record.surveyFinishDate) {
+                        isoFinishDate = df.format(record.surveyFinishDate)
+                    }
 
-                    isoFinishDate = df.format(record.surveyFinishDate);
-                    isoFinishTime = time.format(record.surveyFinishTime);
+                    if (record.surveyFinishTime)
+                        if (record.surveyFinishTime instanceof String) {
+                            java.text.DateFormat t = new java.text.SimpleDateFormat("hh:mm");
+                            isoFinishTime = time.format(t.parse(record.surveyFinishTime))
+                            println("${isoFinishTime} is obtained by parsing String")
+                        } else
+                            isoFinishTime = time.format(record.surveyFinishTime)
+
                 } catch (Exception ex) {
-                    println("Date format error ${activityIndex} >>  >> ${record.surveyStartTime}")
+                    println(" ${activityIndex}th date/time format cannot be recognized")
+                    println(record.surveyFinishTime.getClass())
+                    println(ex)
+                    ex.printStackTrace()
+                    System.exit(1)
                 }
-
-
 
                 // Upload photos to the stageing area.
                 def sightingPhotos = []
@@ -172,11 +187,11 @@ static void main(String[] args) {
 
                         }
                         println("Downloading image file...")
-                        println("File name "+ IMAGES_PATH+fileName)
+                        println("File name " + IMAGES_PATH + fileName)
                         if (!DEBUG_AND_VALIDATE) {
-                            try{
+                            try {
                                 URL url = new URL(address)
-                                File newFile = new File(IMAGES_PATH+fileName) << url.openStream()
+                                File newFile = new File(IMAGES_PATH + fileName) << url.openStream()
                                 def http = new HTTPBuilder(IMAGE_UPLOAD_URL)
                                 println("Uploading image...")
 
@@ -192,7 +207,7 @@ static void main(String[] args) {
                                     response.success = { resp, data ->
                                         // Convert to map
                                         def documents = data?.getText()
-                                        if(documents) {
+                                        if (documents) {
                                             def documentsMap = new JsonSlurper().parseText(documents)
                                             sightingPhotos << documentsMap?.files?.get(0)
                                             println("Image upload successful. - ${i}")
@@ -201,7 +216,7 @@ static void main(String[] args) {
                                         }
                                     }
                                 }
-                            } catch(Exception e) {
+                            } catch (Exception e) {
                                 println("Error downloading image" + e)
                             }
 
@@ -210,13 +225,11 @@ static void main(String[] args) {
                 }
 
                 activity.outputs[0].data.surveyStartDate = isoDate
-                activity.outputs[0].data.surveyStartTime = isoDateTime?isoDateTime:null
-                activity.outputs[0].data.surveyFinishDate = isoFinishDate ? isoFinishDate:null
-                activity.outputs[0].data.surveyFinishTime = isoFinishTime ? isoFinishTime:null
+                activity.outputs[0].data.surveyStartTime = isoDateTime ? isoDateTime : ""
+                activity.outputs[0].data.surveyFinishDate = isoFinishDate ? isoFinishDate : ""
+                activity.outputs[0].data.surveyFinishTime = isoFinishTime ? isoFinishTime : ""
 
                 activity.outputs[0].data.surveyType = record.surveyType
-
-
 
 //                activity.outputs[0].data.nearestLocationName = record."nearestLocationName" ? (record."nearestLocationName").trim(): ""
 //                activity.outputs[0].data.lifeStatus = record."lifeStatus" ? (record."lifeStatus").trim() : ""
@@ -227,114 +240,96 @@ static void main(String[] args) {
                 activity.outputs[0].data.notes = record."notes" ? (record."notes").trim() : ""
                 activity.outputs[0].data.recordedBy = record."recordedBy" ? (record."recordedBy").trim() : ""
 
-                activity.outputs[0].data.raouNumber = (int) Float.parseFloat(record.raouNumber)
-                activity.outputs[0].data.individualCount = record.individualCount ?  (int) Float.parseFloat(record.individualCount) : 1
-                activity.outputs[0].data.bookNumber = (int) Float.parseFloat(record.bookNumber)
+                activity.outputs[0].data.raouNumber =record.raouNumber ? (int) Float.parseFloat(record.raouNumber): ''
 
+                int individualCount = record.individualCount ? (int) Float.parseFloat(record.individualCount) : 1
+                if (individualCount == 0)
+                    activity.outputs[0].data['individualCount'] = 1
+                else
+                    activity.outputs[0].data['individualCount'] = individualCount
 
+                activity.outputs[0].data.bookNumber =record.bookNumber ?  (int) Float.parseFloat(record.bookNumber) :''
 
                 //Find siteId by locationId
-                def locationId = record.locationId?record.locationId: record['latitude']+"_"+record['longitude']
-                def currentSite  = sites.find{s -> s.locationId == locationId}
-                activity.outputs[0].data.location = currentSite? currentSite.siteId : null
+                def locationId = record.locationId ? record.locationId : record['latitude'] + "_" + record['longitude']
+                def currentSite = sites.find { s -> s.locationId == locationId }
+                activity.outputs[0].data.location = currentSite ? currentSite.siteId : null
 
                 // Custom mapping.
 
-                activity.outputs[0].data.species = [:]
-                activity.outputs[0].data.species.name = record.commonName
-                activity.outputs[0].data.species.guid = ''
-                activity.outputs[0].data.species.scientificName = record.species
-                activity.outputs[0].data.species.commonName = record.commonName
-                activity.outputs[0].data.species.outputSpeciesId = ''
+//                activity.outputs[0].data.species = [:]
+//                activity.outputs[0].data.species.name = record.commonName
+//                activity.outputs[0].data.species.guid = ''
+//                activity.outputs[0].data.species.scientificName = record.species
+//                activity.outputs[0].data.species.commonName = record.commonName
+//                activity.outputs[0].data.species.outputSpeciesId = ''
+
+                if (record.species) {
+                    def species = [:]
+                    activity.outputs[0].data.species = species
+
+                    species['name'] = record.species
+                    species['commonName'] = record.commonName
+
+                    String encodedSurveyName = java.net.URLEncoder.encode(activity.outputs[0].name)
+                    String encodedSpecies = java.net.URLEncoder.encode(record.'species')
+
+                    // Get Unique Species Id
+                    def uniqueIdResponse = new URL(Globals.SERVER_URL + "/ws/species/uniqueId")?.text
+                    def jsonResponse = new groovy.json.JsonSlurper()
+                    def outputSpeciesId = jsonResponse.parseText(uniqueIdResponse)?.outputSpeciesId
+                    species['outputSpeciesId'] = outputSpeciesId
 
 
-//                activity.outputs[0].data.speciesSightings =[]
-//                def speciesSighting = [:]
-//                speciesSighting['individualCount'] = (int) Float.parseFloat(record.individualCount)
-//                speciesSighting['abundanceCode'] = record.abundanceCode
-//                speciesSighting['breedingStatus'] = record.breedingStatus
-//                speciesSighting['habitatCode'] = record.habitatCode
-//                speciesSighting['sightingComments'] = record.sightingComments
-//
-//                speciesSighting['species'] = [:]
-//                speciesSighting['species']['name'] = record.species
-//                speciesSighting['species']['commonName'] = record.commonName
-//
-//
-//
-//                speciesSighting['sightingPhoto'] = []
-//
-//                for (i = 0; i < sightingPhotos.size(); i++) {
-//                    speciesSighting['sightingPhoto']  << sightingPhotos.get(i)
-//                }
-//
-//                activity.outputs[0].data.speciesSightings.push(speciesSighting)
+                    def speciesResponse = new URL(Globals.SPECIES_URL + "&q=${encodedSpecies}&output=${encodedSurveyName}&dataFieldName=species").text
+                    def speciesJSON = new groovy.json.JsonSlurper()
+                    def autoCompleteList = speciesJSON.parseText(speciesResponse)?.autoCompleteList
+                    if (!autoCompleteList) {
+                        species.name = record.'species'
+                    }
 
-//            def behaviour = (record."observedBehaviour") ? (record."observedBehaviour").trim() : ""
-//            switch(behaviour) {
-//                case "In a shrub (woody plant <5m)":
-//                case "In a tree (woody plant >5m)":
-//                    activity.outputs[0].data.observedBehaviour =  "Yes, the goanna climbed a tree"
-//                    break
-//                case "On ground":
-//                    activity.outputs[0].data.observedBehaviour =  "No, the goanna did not climb a tree"
-//                    break
-//                case "Other (please describe in the Notes section)" :
-//                    activity.outputs[0].data.observedBehaviour =  "I’m not sure"
-//                    break
-//                case "":
-//                    println ("Empty behaviour")
-//                    break
-//                default:
-//                    println ("Invalid behaviour")
-//
-//            }
-//
-//            def classRange = (record."fullLengthInMetresClassRange") ? (record."fullLengthInMetresClassRange").trim() : ""
-//            switch(classRange) {
-//                case "1.0-1.5 metres":
-//                    activity.outputs[0].data.fullLengthInMetresClassRange =  "1.0 – 1.5 metres"
-//                    break
-//                case "0.5-1.0 metres":
-//                    activity.outputs[0].data.fullLengthInMetresClassRange =  "0.5 – 1.0 metre"
-//                    break
-//                case "Less than 0.5 metres (50 centimetres)":
-//                    activity.outputs[0].data.fullLengthInMetresClassRange =  "Less than 0.5 metres (50 centimetres)"
-//                    break
-//                case "Over 1.5 metres":
-//                    activity.outputs[0].data.fullLengthInMetresClassRange =  "Over 1.5. metres"
-//                    break
-//                case "I'm not sure":
-//                    activity.outputs[0].data.fullLengthInMetresClassRange =  "I’m not sure"
-//                    break
-//                case "":
-//                    println ("Empty classRange")
-//                    break
-//                default:
-//                    println ("Invalid classRange")
-//            }
+                    autoCompleteList?.eachWithIndex { item, index ->
+                        if (index == 0) {
+                            species.name = item.name
+                            species.guid = item.guid
+                            species.scientificName = item.scientificName
+                            species.commonName = item.commonName
+                        }
+                    }
+
+                }
+
+
 
 
 
 
                 if (Globals.DEBUG_AND_VALIDATE) {
-                    println(new groovy.json.JsonBuilder( activity ).toString())
+                    println(new groovy.json.JsonBuilder(activity).toString())
+                    //System.exit(0)
                 }
 
-//                System.exit(0)
-                String createdActivityId = postRecord(activity)
 
-                if (createdActivityId){
-                    if (Globals.DEBUG_AND_VALIDATE){
+                String createdActivityId
+                createdActivityId = postRecord(activity)
+
+                if (createdActivityId) {
+                    if (Globals.DEBUG_AND_VALIDATE) {
                         println(createdActivityId)
                     }
-                    recordsLog << createdActivityId +'\n'
-                    System.exit(0)
-                }else{
+                    recordsLog << Globals.SERVER_URL +'/bioActivity/index/' + createdActivityId +'\n'
+
+                } else {
                     println('Error in creating records. System aborted')
                     System.exit(0)
                 }
+
+                print("${activityIndex}th record created ")
+                createdActivityId ? println(" : ${createdActivityId}") : println()
+
             }
+
+        }
     }
 
 
@@ -517,11 +512,10 @@ def createSites(activities, existingSites,siteLogFile){
                 if (siteId) {
                     site.siteId = siteId
                     println siteId +" is created"
-                    System.exit(0)
                 }
                 else{
                     println 'site is not created properly'
-                    System.exit(0)
+                    System.exit(1)
                 }
                 //add locationid to site
                 site.locationId = locationId
@@ -569,7 +563,6 @@ def uploadSite(server_url, site){
             return site_obj.id
         }else{
             def error = connection.getErrorStream().text
-            println(connection.responseCode + " : " + error)
             def jsonSlurper = new JsonSlurper()
             def result = jsonSlurper.parseText(error)
             //401 authentication error may still create site , why? don't know
