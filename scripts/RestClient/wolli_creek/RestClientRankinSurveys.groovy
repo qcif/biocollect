@@ -9,9 +9,13 @@
 // DONT REMOVE 'TYPE' AND 'NAME' IN THE TEMPLATE
 //Make sure user has 'Editor' or "admin" permissions
 
+//For deleting, "cookie" need to be updated
 
 // User must have a auth token [ ozatlasproxy.ala.org.au]
 // Generating UUID on the device: python -c 'import uuid; print str(uuid.uuid1())'
+
+
+
 
 @Grapes([
         @Grab('org.codehaus.groovy.modules.http-builder:http-builder:0.7'),
@@ -62,6 +66,7 @@ class Globals {
     static ADD_NEW_ACTIVITY_URL = "/bioActivity/ajaxUpdate?pActivityId=${PROJECT_ACTIVITY_ID}"
     static IMAGE_UPLOAD_URL = 'http://devt.ala.org.au:8087/biocollect/ws/attachment/upload'
     static SITE_CREATION_URL = '/site/ajaxUpdate'
+    static RECORD_LOG = "Rankin_DEV.log"
 }
 
 
@@ -86,6 +91,7 @@ static void main(String[] args) {
             Globals.SERVER_URL = 'https://biocollect.ala.org.au'
             Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
             SITE_LOG_FILE = Globals.PROJECT_ID + ".prod.site.log"
+            Globals.RECORD_LOG = "Rankin_prod.log"
         }
     }
 
@@ -94,9 +100,7 @@ static void main(String[] args) {
     def activities = loadXsl(DATA_FILE)
     println("Total activities to upload = ${activities?.size()}")
     SITES = createSites(activities, SITES,SITE_LOG_FILE)
-
     createRecords(activities, SITES, DATA_TEMPLATE_FILE)
-
     println("Completed..")
 
 }
@@ -112,12 +116,12 @@ static void main(String[] args) {
         println jsonStr
 
         //Store all created record ID
-        File recordsLog = new File( data_template_file+"_created_records.log")
+        File recordsLog = new File( Globals.RECORD_LOG)
 
 
         // Loop through the activities
         activities?.eachWithIndex { activityRow, activityIndex ->
-            if (activityIndex >=10) {
+            if (activityIndex >22870) {
                 record = activityRow
                 def jsonSlurper = new groovy.json.JsonSlurper()
                 def activity = jsonSlurper.parseText(jsonStr)
@@ -251,9 +255,13 @@ static void main(String[] args) {
                 activity.outputs[0].data.bookNumber =record.bookNumber ?  (int) Float.parseFloat(record.bookNumber) :''
 
                 //Find siteId by locationId
-                def locationId = record.locationId ? record.locationId : record['latitude'] + "_" + record['longitude']
-                def currentSite = sites.find { s -> s.locationId == locationId }
-                activity.outputs[0].data.location = currentSite ? currentSite.siteId : null
+                def locationId = record.locationId?record.locationId: record['verbatimLatitude']+"_"+record['verbatimLongitude']
+                def currentSite  = sites.find{s -> s.locationId == locationId}
+                activity.outputs[0].data.location = currentSite? currentSite.siteId : null
+                activity.siteId = currentSite? currentSite.siteId : null
+
+                activity.outputs[0].data.locationLatitude = record["verbatimLatitude"]
+                activity.outputs[0].data.locationLongitude = record["verbatimLongitude"]
 
                 // Custom mapping.
 

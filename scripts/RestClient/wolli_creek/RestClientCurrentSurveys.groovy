@@ -66,6 +66,7 @@ class Globals {
     static IMAGE_UPLOAD_URL = 'http://devt.ala.org.au:8087/biocollect/ws/attachment/upload'
     //def IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
     static SITE_CREATION_URL = '/site/ajaxUpdate'
+    static RECORD_LOG = "Current_DEV.log"
 }
 
 
@@ -90,6 +91,7 @@ static void main(String[] args) {
             Globals.SERVER_URL = 'https://biocollect.ala.org.au'
             Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
             SITE_LOG_FILE = Globals.PROJECT_ID + ".prod.site.log"
+            Globals.RECORD_LOG = "Current_prod.log"
         }
     }
 
@@ -108,6 +110,7 @@ static void main(String[] args) {
             Globals.SERVER_URL = 'https://biocollect-test.ala.org.au'
             Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
             SITE_LOG_FILE = Globals.PROJECT_ID+".test.site.log"
+            Globals.RECORD_LOG = "Current_test.log"
         }
     }
 
@@ -122,6 +125,7 @@ static void main(String[] args) {
             Globals.SERVER_URL = "http://localhost:8087/biocollect"
             Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
             SITE_LOG_FILE = Globals.PROJECT_ID+".devbox.site.log"
+            Globals.RECORD_LOG = "Current_DEV.log"
 
             println(Globals.USERNAME + ' ' + Globals.SERVER_URL)
 
@@ -172,12 +176,12 @@ def createRecords(activities, sites, data_template_file){
         println jsonStr
 
         //Store all created record ID
-        File recordsLog = new File( data_template_file+"_created_records.log")
+       File recordsLog = new File( Globals.RECORD_LOG)
 
 
         // Loop through the activities
         activities?.eachWithIndex { activityRow, activityIndex ->
-            if (activityIndex >=10) { // 183
+            if (activityIndex >=0) { // 183
                 record = activityRow
                 def jsonSlurper = new groovy.json.JsonSlurper()
                 def activity = jsonSlurper.parseText(jsonStr)
@@ -304,9 +308,13 @@ def createRecords(activities, sites, data_template_file){
 
 
                 //Find siteId by locationId
-                def locationId = record.locationId?record.locationId: record['latitude']+"_"+record['longitude']
+                def locationId = record.locationId?record.locationId: record['verbatimLatitude']+"_"+record['verbatimLongitude']
                 def currentSite  = sites.find{s -> s.locationId == locationId}
                 activity.outputs[0].data.location = currentSite? currentSite.siteId : null
+                activity.siteId = currentSite? currentSite.siteId : null
+
+                activity.outputs[0].data.locationLatitude = record["verbatimLatitude"]
+                activity.outputs[0].data.locationLongitude = record["verbatimLongitude"]
 
                 // Custom mapping.
 

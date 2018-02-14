@@ -6,8 +6,15 @@
 // variable json string data will be printed in the console
 // Use http://jsonformatter.org/ to format the data. (make sure to remove the " " around the string...)
 
-// DONT REMOVE 'TYPE' AND 'NAME' IN THE TEMPLATE
 
+// DONT REMOVE 'TYPE' AND 'NAME' IN THE TEMPLATE
+// siteId need to be assinged to activity.siteId and activity.output.data.location
+// Othersise, fuctions of clusters or points on map will not work
+// Udpate session/cookie before run 'deleteActivity' - if need to
+
+//Global.RECORD_LOG appends the existing created activity. Double check the filename
+
+//Sites will be created first and logged into site log, and then reloaded
 
 // User must have a auth token [ ozatlasproxy.ala.org.au]
 // Generating UUID on the device: python -c 'import uuid; print str(uuid.uuid1())'
@@ -61,9 +68,11 @@ class Globals {
     static SPECIES_URL = "https://biocollect.ala.org.au/search/searchSpecies/${PROJECT_ACTIVITY_ID}?limit=1&hub=ala"
     //static ADD_NEW_ACTIVITY_URL = "/ws/bioactivity/save?pActivityId=${PROJECT_ACTIVITY_ID}"
     static ADD_NEW_ACTIVITY_URL = "/bioActivity/ajaxUpdate?pActivityId=${PROJECT_ACTIVITY_ID}"
+    static EDIT_ACTIVITY_URL = "/bioActivity/ajaxUpdate"
     static IMAGE_UPLOAD_URL = 'http://devt.ala.org.au:8087/biocollect/ws/attachment/upload'
     //def IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
     static SITE_CREATION_URL = '/site/ajaxUpdate'
+    static RECORD_LOG = "CBOC_DEV.log"
 }
 
 
@@ -88,6 +97,7 @@ static void main(String[] args) {
             Globals.SERVER_URL = 'https://biocollect.ala.org.au'
             Globals.IMAGE_UPLOAD_URL = 'https://biocollect.ala.org.au/ws/attachment/upload'
             SITE_LOG_FILE = Globals.PROJECT_ID + ".prod.site.log"
+            Globals.RECORD_LOG = "CBOC_prod.log"
         }
     }
 
@@ -96,17 +106,6 @@ static void main(String[] args) {
     def activities = loadXsl(DATA_FILE)
     println("Total activities to upload = ${activities?.size()}")
     SITES = createSites(activities, SITES,SITE_LOG_FILE)
-
-//    println ('Check if sites were created successfully?  Y/N')
-//    def answer = System.in.newReader().readLine()
-//
-//    if (!(answer == 'Y' || answer == 'y'  )){
-//        println ('Stop!')
-//        System.exit(0)
-//    }else{
-//        println 'Continue........'
-//    }
-
     createRecords(activities, SITES, DATA_TEMPLATE_FILE)
 
     println("Completed..")
@@ -138,17 +137,32 @@ static void main(String[] args) {
 
 
     def createRecords(activities, sites, data_template_file){
+        //Store all created record ID
+        File recordsLog = new File( Globals.RECORD_LOG)
+
+        def existingRecords = []
+//        if (recordsLog.exists()){
+//            recordsLog.eachLine { String line ->
+//                String id = line.reverse().take(36).reverse()
+//                existingRecords.push(id)
+//            }
+//        }
+//        for(re in existingRecords){
+//            deleteActivity("https://biocollect.ala.org.au/ala/bioActivity", re)
+//        }
+//        println('Delete completed')
+//        System.exit(0)
+
         println("Loading data_template file")
         String jsonStr = new File(data_template_file).text
-        println jsonStr
 
-        //Store all created record ID
-        File recordsLog = new File( data_template_file+"_created_records.log")
 
 
         // Loop through the activities
         activities?.eachWithIndex { activityRow, activityIndex ->
-            if (activityIndex >=10) { // 183
+            if (activityIndex >=0) { // 183
+                //String existingRecordId = existingRecords[activityIndex]
+
                 record = activityRow
                 def jsonSlurper = new groovy.json.JsonSlurper()
                 def activity = jsonSlurper.parseText(jsonStr)
@@ -277,9 +291,13 @@ static void main(String[] args) {
 
 
                 //Find siteId by locationId
-                def locationId = record.locationId?record.locationId: record['latitude']+"_"+record['longitude']
+                def locationId = record.locationId?record.locationId: record['verbatimLatitude']+"_"+record['verbatimLongitude']
                 def currentSite  = sites.find{s -> s.locationId == locationId}
                 activity.outputs[0].data.location = currentSite? currentSite.siteId : null
+                activity.siteId = currentSite? currentSite.siteId : null
+
+                activity.outputs[0].data.locationLatitude = Float.parseFloat(record["verbatimLatitude"])
+                activity.outputs[0].data.locationLongitude = Float.parseFloat(record["verbatimLongitude"])
 
                 // Custom mapping.
 
@@ -346,16 +364,18 @@ static void main(String[] args) {
 
 
                 if (Globals.DEBUG_AND_VALIDATE) {
-                    println(new groovy.json.JsonBuilder( activity ).toString())
+                    println(new groovy.json.JsonBuilder( activity ).toPrettyString())
                     //System.exit(0)
                 }
 
                 String createdActivityId
                 createdActivityId = postRecord(activity)
+                //createdActivityId = updateRecord(existingRecordId,activity)
 
                 if (createdActivityId){
                     if (Globals.DEBUG_AND_VALIDATE){
                         println(createdActivityId)
+                       // System.exit(0)
                     }
                     recordsLog << Globals.SERVER_URL +'/bioActivity/index/' + createdActivityId +'\n'
 
@@ -364,7 +384,7 @@ static void main(String[] args) {
                     System.exit(1)
                 }
 
-                print ("${activityIndex}th record created ")
+                print ("${activityIndex}th record edited ")
                 createdActivityId ? println(" : ${createdActivityId}") : println()
             }
         }
@@ -400,6 +420,60 @@ def postRecord(activity){
         return activityId
     }
 }
+
+//def updateRecord(activityId, activity){
+//    def connection = new URL("${Globals.SERVER_URL}${Globals.EDIT_ACTIVITY_URL+'?id='+activityId}").openConnection() as HttpURLConnection
+//    // set some headers
+//    connection.setRequestProperty('userName', "${Globals.USERNAME}")
+//    connection.setRequestProperty('authKey', "${Globals.AUTH_KEY}")
+//    connection.setRequestProperty('Content-Type', 'application/json;charset=utf-8')
+//    connection.setRequestMethod("POST")
+//    connection.setDoOutput(true)
+//
+//    java.io.OutputStreamWriter wr = new java.io.OutputStreamWriter(connection.getOutputStream(), 'utf-8')
+//    wr.write(new groovy.json.JsonBuilder(activity).toString())
+//    wr.flush()
+//    wr.close()
+//
+//    if (connection.responseCode != 200) {
+//        def error = connection.getErrorStream().text
+//        def jsonSlurper = new JsonSlurper()
+//        def result = jsonSlurper.parseText(error)
+//        println(connection.responseCode + ": " + result.error)
+//        return null
+//    }
+//    else{
+//        return activityId
+//    }
+//}
+
+def deleteActivity(server_url, aid){
+    def connection = new URL(server_url + '/delete/' + aid).openConnection() as HttpURLConnection
+// set some headers
+    connection.setRequestProperty('userName', Globals.USERNAME)
+    connection.setRequestProperty('authKey', Globals.AUTH_KEY)
+    connection.setRequestProperty('Cookie', 'recentHub=ala; recentHub=ala; _ga=GA1.3.166953798.1511148250; __utmz=8847461.1516579788.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utmz=93619214.1518387953.35.8.utmcsr=auth.ala.org.au|utmccn=(referral)|utmcmd=referral|utmcct=/cas/login; _gid=GA1.3.471789785.1518387953; __utma=93619214.1320148222.1509067396.1518414557.1518474722.41; __utmb=93619214.0.10.1518474722; __utmc=93619214; __utma=8847461.166953798.1511148250.1516579788.1518474766.2; __utmc=8847461; ALA-Auth="qifeng.bai@csiro.au"; JSESSIONID=25599606E5756CDDDFC21B8F2C3BF2D2')
+    connection.setRequestProperty('Content-Type', 'connection.setRequestProperty(\'authKey\', auth_key)')
+    connection.setRequestProperty("Content-Type", "application/json")
+    connection.setRequestMethod("POST")
+    connection.setDoOutput(true)
+
+
+    java.io.OutputStreamWriter wr = new java.io.OutputStreamWriter(connection.getOutputStream(), 'utf-8')
+    wr.flush()
+    wr.close()
+    // get the response code - automatically sends the request
+    def statusCode = connection.responseCode
+    if (statusCode == 200 ){
+        def result = connection.inputStream.text;
+        println(result)
+       }else {
+        def error = connection.getErrorStream().text
+        println(connection.responseCode + " : " + error)
+     }
+
+}
+
 
 
 
@@ -505,9 +579,7 @@ def loadSites(String file){
 def createSites(activities, existingSites,siteLogFile){
     //Create sites without duplciation
     activities?.eachWithIndex { activityRow, activityIndex ->
-
-
-        if (activityIndex >=1){
+        if (activityIndex < 20){
             def name = activityRow['siteName'] ? activityRow['siteName'] :'batch created'
             def latitude = activityRow.verbatimLatitude ? activityRow.verbatimLatitude: 0
             def longitude = activityRow.verbatimLongitude ? activityRow.verbatimLongitude: 0
@@ -560,14 +632,13 @@ def createSites(activities, existingSites,siteLogFile){
         }
     }
 
-    println (existingSites.size() + ' sites were created')
+    println (existingSites.size() + ' sites in Total')
 
     File siteLog = new File( siteLogFile)
     if (siteLog.exists())
         siteLog.delete()
     existingSites.each {st ->
         def line = st.siteId +"\t" + st.locationId +"\t"+st.name+'\n'
-        print(line)
         siteLog << line
     }
     return existingSites
