@@ -232,6 +232,13 @@ function enmapify(args) {
                     centroidLatObservable(null);
                 }
 
+            }else if (feature.geometry.type == "LineString"){
+                //Use centroid as lan/lng for line
+                var c = centroid(feature);
+                latObservable(c[1]);
+                lonObservable(c[0]);
+                centroidLonObservable(null);
+                centroidLatObservable(null);
             }else{
                 var c = centroid(feature);
                 latObservable(null);
