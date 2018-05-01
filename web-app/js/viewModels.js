@@ -277,7 +277,11 @@ function enmapify(args) {
         } else if (feature.geometry.type == 'Point') {
             coords = feature.geometry.coordinates;
             return [parseFloat(coords[0]), parseFloat(coords[1])];
-        } else {
+        } else if ( feature.geometry.type == "LineString") {
+            coords = feature.geometry.coordinates[0];
+            return [parseFloat(coords[0]), parseFloat(coords[1])];
+        }
+        else {
             console.log(feature.geometry.type + ' is not a supported type for centroid()');
             return [0, 0];
         }
