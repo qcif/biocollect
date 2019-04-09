@@ -1,0 +1,55 @@
+.boxsizingBorder {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    border: 0;
+}
+
+#commentOutput{
+    background-color: #f2f2f2;
+    border: 1px solid #e3e3e3;
+    padding: 10px;
+}
+
+.comment-post{
+    padding:10px;
+}
+
+.comment-body{
+    margin: 5px 0px 5px 0px;
+    padding: 5px 5px 5px 15px;
+    background-color: white;
+}
+
+.comment-list > .comment-body {
+    border: 1px solid #e3e3e3;
+}
+
+.comment-indent{
+    width: 16px;
+    height: 16px;
+}
+
+.comment-username {
+    font-size: 16px;
+}
+
+pre.media{
+    background-color: inherit;
+    border: 0px;
+    padding-left: 0px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-bottom: 0px;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.margin-bottom-five{
+    margin-bottom: 5px;
+}
+
+b.media-heading{
+    font-family: inherit;
+}
