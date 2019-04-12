@@ -4,6 +4,8 @@ import au.org.ala.biocollect.merit.SettingService
 
 class UrlMappings {
 
+        static excludes = ['/plugins']
+
 
         static isHubValid(hub) {
                 //def settingsService = applicationContext.getBean(SettingService)

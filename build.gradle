@@ -123,5 +123,5 @@ bootRepackage {
 assets {
     minifyJs = true
     minifyCss = true
-    from '/grails-app/assets/'
+
 }

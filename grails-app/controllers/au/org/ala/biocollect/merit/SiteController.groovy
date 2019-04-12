@@ -94,6 +94,7 @@ class SiteController {
              isSiteStarredByUser: userService.isSiteStarredByUser(user?.userId ?: "0", site.siteId)?.isSiteStarredByUser,
              user               : user
             ]
+            log.debug(result.toString())
 
             if (params.format == 'json')
                 render result as JSON
