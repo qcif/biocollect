@@ -568,4 +568,17 @@ content.defaultOverriddenLabels = [
         ]
 ]
 
+map.baseLayers = [
+        [
+                'code': 'minimal',
+                'displayText': 'Road map',
+                'default': false
+        ],
+        [
+                'code': 'worldimagery',
+                'displayText': 'Satellite',
+                'default': true
+        ]
+]
+
 notification.enabled=false
