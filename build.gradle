@@ -83,6 +83,7 @@ dependencies {
     compile "org.apache.httpcomponents:httpclient:4.4.1"
     //JSON converter
     compile 'org.grails.plugins:converters'
+    runtime 'org.webjars:jquery:1.12.4'
     //mimic grails.config.locations like in Grails 2.x
     compile 'org.grails.plugins:external-config:2.0.0.RC1'
     compile "org.grails.plugins:excel-import:3.0.0"

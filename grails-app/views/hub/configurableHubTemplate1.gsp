@@ -59,6 +59,12 @@ section#breadcrumb {
 #main-content a:focus {
   color: ${hrefcolor};
 }
+
+<g:if test="${defaulttextcolor && defaultbackgroundcolor}">
+    <g:render template="clearButtonStyle" model="${[selector: '.btn']}" />
+    <g:render template="clearButtonStyle" model="${[selector: '.btn-default']}" />
+</g:if>
+
 #main-content .btn.btn-default {
   color: ${defaulttextcolor};
   background-color: ${defaultbackgroundcolor};
@@ -81,6 +87,11 @@ section#breadcrumb {
   background-color: ${defaultbtnbackgroundcoloractive};
   background-position: center center;
 }
+
+<g:if test="${primarytextcolor && primarybackgroundcolor}">
+    <g:render template="clearButtonStyle" model="${[selector: '.btn-primary']}" />
+</g:if>
+
 #main-content .btn-primary {
   color: ${primarytextcolor};
   background-color: ${primarybackgroundcolor};
@@ -98,8 +109,33 @@ section#breadcrumb {
 }
 #main-content .btn-primary:active,
 #main-content .btn-primary.active {
-  background-color: ${primarybackgroundcolor} 9 ;
+  background-color: ${primarybackgroundcolor};
 }
+
+<g:if test="${makePrimaryButtonAnOutlineButton}">
+    <g:render template="outlineButton" model="${[selector: '.btn-primary', textColor: primaryButtonOutlineTextColor, hoverColor: primaryButtonOutlineTextHoverColor]}"></g:render>
+</g:if>
+
+<g:if test="${makeDefaultButtonAnOutlineButton}">
+    <g:render template="outlineButton" model="${[selector: '.btn-default', textColor: defaultButtonOutlineTextColor, hoverColor: defaultButtonOutlineTextHoverColor]}"></g:render>
+</g:if>
+
+<g:if test="${ whatIsThisButtonTextColor && whatIsThisButtonBackgroundColor }">
+    <g:render template="customButton" model="${[selector: '.btn-info.btn-whatisthis', textColor: whatIsThisButtonTextColor, backColor: whatIsThisButtonBackgroundColor]}"></g:render>
+</g:if>
+
+<g:if test="${ gettingStartedButtonTextColor && gettingStartedButtonBackgroundColor }">
+    <g:render template="customButton" model="${[selector: '.btn-info.btn-gettingstarted', textColor: gettingStartedButtonTextColor, backColor: gettingStartedButtonBackgroundColor]}"></g:render>
+</g:if>
+
+<g:if test="${ addARecordButtonTextColor && addARecordButtonBackgroundColor }">
+    <g:render template="customButton" model="${[selector: '.btn-success.btn-addarecord', textColor: addARecordButtonTextColor, backColor: addARecordButtonBackgroundColor]}"></g:render>
+</g:if>
+
+<g:if test="${ viewRecordsButtonTextColor && viewRecordsButtonBackgroundColor }">
+    <g:render template="customButton" model="${[selector: '.btn-info.btn-viewrecords', textColor: viewRecordsButtonTextColor, backColor: viewRecordsButtonBackgroundColor]}"></g:render>
+</g:if>
+
 #main-content .btn-danger:hover {
   color: white;
 }
@@ -254,6 +290,12 @@ section#breadcrumb {
 #main-content .leaflet-container a {
   color: black;
 }
+
+#main-content .projecttag {
+  background: ${tagBackgroundColor};
+  color: ${tagTextColor};
+}
+
 @media (max-width: 979px) {
   #main-content .navbar-inverse .nav-collapse .nav > li > a,
 #main-content .navbar-inverse .nav-collapse .dropdown-menu a {
@@ -602,7 +644,7 @@ section#breadcrumb {
 #custom-header .navbar {
   min-height: 58px;
   font-family: Roboto, Helvetica, "Helvetica Neue", Arial, sans-serif;
-  border-bottom: 0px solid #fff;
+  border: 0px;
 }
 #custom-header .navbar-inverse .navbar-inner {
   background-color: ${menubackgroundcolor};
@@ -701,9 +743,6 @@ section#breadcrumb {
   margin-top: 4px;
   line-height: 1.1em;
 }
-#custom-footer #alaLink .headerLogo {
-  margin-top: -27px;
-}
 #custom-footer #poweredBy {
   font-size: 11px;
   display: block;
@@ -711,8 +750,25 @@ section#breadcrumb {
 #custom-footer #alaBy {
   font-size: 16px;
 }
+
+#custom-footer #alaLink.brand {
+  margin-top:10px;
+  margin-right: 10px;
+  display: inline-block;
+}
+
 #custom-footer .brand .headerLogo {
   height: 36px;
-  padding-top: 10px;
-  margin-top: -3px;
+}
+
+#custom-footer .footer-logo {
+  max-height: 100px;
+  max-width: 200px;
+  margin-right:10px;
+  margin-top: 10px;
+  vertical-align: top;
+}
+
+.inline-block {
+    display: inline-block;
 }

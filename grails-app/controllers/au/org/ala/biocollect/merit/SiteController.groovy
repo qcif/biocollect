@@ -2,13 +2,9 @@ package au.org.ala.biocollect.merit
 
 import au.org.ala.web.AuthService
 import grails.converters.JSON
-//import net.sf.json.JSON
-
-
 import org.apache.commons.lang.StringUtils
 import org.apache.http.HttpStatus
 import grails.web.servlet.mvc.GrailsParameterMap
-
 import static javax.servlet.http.HttpServletResponse.SC_CONFLICT
 import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT
 
@@ -94,7 +90,6 @@ class SiteController {
              isSiteStarredByUser: userService.isSiteStarredByUser(user?.userId ?: "0", site.siteId)?.isSiteStarredByUser,
              user               : user
             ]
-            log.debug(result.toString())
 
             if (params.format == 'json')
                 render result as JSON

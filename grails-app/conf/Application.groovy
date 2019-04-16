@@ -113,7 +113,7 @@ security.cas.adminRole = "ROLE_FC_ADMIN"
 
 headerAndFooter.baseURL = "https://www.ala.org.au/commonui-bs2-v2/commonui-bs2"
 
-//security.cas.readOnlyOfficerRole = "ROLE_FC_READ_ONLY"
+security.cas.readOnlyOfficerRole = "ROLE_FC_READ_ONLY"
 
 upload.images.path = "/data/${appName}/images/"
 upload.path = "/data/${appName}/"
@@ -310,6 +310,7 @@ if(!speciesConfiguration.default){
     ]
 }
 
+
 settings.surveyMethods="fielddata.survey.methods"
 dataAccessMethods = [
         "oasrdfs",
@@ -497,6 +498,74 @@ activitypropertypath = [
         spatialAccuracy: ['projectActivity', 'spatialAccuracy'],
         methodType: ['projectActivity', 'methodType'],
         activityOwnerNameFacet: ['projectActivity', 'activityOwnerName']
+]
+
+
+content.defaultOverriddenLabels = [
+        [
+                id: 1,
+                showCustomText: false,
+                page: 'Project finder',
+                defaultText: 'Showing XXXX to YYYY of ZZZZ projects',
+                customText:'',
+                notes: 'This text is generated dynamically. XXXX, YYYY & ZZZZ are replaced with dynamically generated content.'
+        ],
+        [
+                id: 2,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'About the project',
+                customText:'',
+                notes: 'Section heading on project\'s about tab.'
+        ],
+        [
+                id: 3,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'Aim',
+                customText:'',
+                notes: 'Section heading on project\'s about tab.'
+        ],
+        [
+                id: 4,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'Description',
+                customText:'',
+                notes: 'Section heading on project\'s about tab.'
+        ],
+        [
+                id: 5,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'Project information',
+                customText:'',
+                notes: 'Section heading on project\'s about tab.'
+        ],
+        [
+                id: 6,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'Program name',
+                customText:'',
+                notes: 'Section heading on project\'s about tab.'
+        ],
+        [
+                id: 7,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'Subprogram name',
+                customText:'',
+                notes: 'Section heading on project\'s about tab.'
+        ],
+        [
+                id: 8,
+                showCustomText: false,
+                page: 'Project > "About" tab',
+                defaultText: 'Project Area',
+                customText:'',
+                notes: 'Section heading for Map.'
+        ]
 ]
 
 notification.enabled=false

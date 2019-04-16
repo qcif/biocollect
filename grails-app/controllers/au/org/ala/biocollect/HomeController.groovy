@@ -30,12 +30,9 @@ class HomeController {
 
     def index() {
         HubSettings hubSettings = SettingService.hubConfig
-
-        if ( hubSettings && hubSettings.overridesHomePage()) {
+        if (hubSettings.overridesHomePage()) {
             if(hubSettings.isHomePagePathSimple()){
                 Map result = hubSettings.getHomePageControllerAndAction()
-                params.controller = result.controller
-                params.action = result.action
                 forward(result)
                 return
             } else {
@@ -47,7 +44,6 @@ class HomeController {
     }
 
     def projectFinder() {
-        def hubSettings = SettingService.getHubConfig()
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 
@@ -117,7 +113,7 @@ class HomeController {
     def geoService() {
         params.max = params.max?:9999
         if(params.geo){
-            params.facets = StringUtils.join(SettingService.getHubConfig().availableFacets,',')
+            params.facets = StringUtils.join(SettingService.getHubConfig().availableFacets?:[],',')
             render searchService.allProjectsWithSites(params) as JSON
         } else {
             render searchService.allProjects(params) as JSON

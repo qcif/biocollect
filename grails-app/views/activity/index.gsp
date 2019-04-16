@@ -153,7 +153,6 @@
 
     function ActivityLevelData() {
         var self = this;
-
         self.activity = JSON.parse('${(activity as JSON).toString().encodeAsJavaScript()}');
         self.site = JSON.parse('${(site as JSON).toString().encodeAsJavaScript()}');
         self.metaModel = <fc:modelAsJavascript model="${metaModel}"/>;

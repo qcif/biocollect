@@ -22,4 +22,3 @@
 //= require pagination.js
 //= require polyfill/es6-promise.auto.js
 //= require restoreTab.js
-//= require underscore/underscore-1.8.3.min.js

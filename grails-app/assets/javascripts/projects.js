@@ -396,6 +396,16 @@ function ProjectViewModel(project, isUserEditor) {
 
 
     self.transients = self.transients || {};
+    self.transients.checkVisibility = function (checkElementId, visibleElementId) {
+        function check() {
+            if($(checkElementId).val() == '') {
+                $(visibleElementId).hide();
+            }
+        }
+
+        setTimeout(check, 0);
+        return true;
+    };
 
     var legalCustodianOrganisationTypeVal = project.legalCustodianOrganisationType? project.legalCustodianOrganisationType: "";
     self.legalCustodianOrganisationType = ko.observable(legalCustodianOrganisationTypeVal);
@@ -438,6 +448,7 @@ function ProjectViewModel(project, isUserEditor) {
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
     self.imageUrl = ko.observable(project.urlImage);
+    self.baseLayer = ko.observable(project.baseLayer || '');
     self.termsOfUseAccepted = ko.observable(project.termsOfUseAccepted || false);
     self.alaHarvest = ko.observable(project.alaHarvest ? true : false);
     self.industries = ko.observableArray(project.industries);
@@ -1105,22 +1116,26 @@ function CreateEditProjectViewModel(project, isUserEditor, options) {
     self.transients.termsOfUseClicked = ko.observable(false);
     
     self.transients.isDataEntryValid = function () {
-        if (!self.isExternal()) {
-            var types = self.scienceType()
-            for( var index = 0; index < types.length; index++){
-                var type = types[index]
-                for(var j = 0; j < self.transients.dataCollectionWhiteList.length; j++){
-                    if(type == self.transients.dataCollectionWhiteList[j]){
-                        return true
+        if(!fcConfig.hideProjectEditScienceTypes) {
+            if (!self.isExternal()) {
+                var types = self.scienceType();
+                for( var index = 0; index < types.length; index++){
+                    var type = types[index];
+                    for(var j = 0; j < self.transients.dataCollectionWhiteList.length; j++){
+                        if(type == self.transients.dataCollectionWhiteList[j]){
+                            return true
+                        }
                     }
                 }
+
+                return false
             }
 
-            return false
+            return true
         }
 
         return true
-    }
+    };
 
     self.clickTermsOfUse = function() {
         self.transients.termsOfUseClicked(true);

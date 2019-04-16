@@ -71,6 +71,7 @@
             flimit: ${grailsApplication.config.facets.flimit},
             occurrenceUrl: "",
             spatialUrl: "",
+            paginationMessage: '${hubConfig.getTextForShowingProjects(grailsApplication.config.content.defaultOverriddenLabels)}',
             absenceIconUrl:"${asset.assetPath(src: 'triangle.png')}"
         };
     </asset:script>
@@ -184,7 +185,7 @@
         initialiseData("allrecords");
     });
     $(function() {
-        var projectFinder = new ProjectFinder();
+        var projectFinder = new ProjectFinder({enablePartialSearch: ${hubConfig.content.enablePartialSearch?:false}});
     });
 </asset:script>
 
