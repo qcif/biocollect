@@ -2,6 +2,10 @@ package au.org.ala.biocollect.merit
 
 import au.org.ala.biocollect.OrganisationController
 import au.org.ala.biocollect.OrganisationService
+import au.org.ala.biocollect.merit.DocumentService
+import au.org.ala.biocollect.merit.RoleService
+import au.org.ala.biocollect.merit.SearchService
+import au.org.ala.biocollect.merit.UserService
 import grails.converters.JSON
 import grails.test.mixin.TestFor
 import spock.lang.Specification

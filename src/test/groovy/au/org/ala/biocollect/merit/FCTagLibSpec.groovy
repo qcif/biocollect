@@ -1,5 +1,6 @@
-package au.org.ala.biocollect.merit
+package au.org.ala.biocollect.au.org.ala.biocollect.merit
 
+import au.org.ala.biocollect.merit.FCTagLib
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
