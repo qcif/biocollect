@@ -25,11 +25,15 @@ function ProjectFinder(config) {
 
     /* The map must only be initialised once, so keep track of when that has happened */
     var mapInitialised = false;
+
+    /* Stores selected project id when a link is selected */
+    var selectedProjectId;
     var spatialFilter = null;
 
     var geoSearch = {};
 
     var refreshSearch = false;
+    var enablePartialSearch = config.enablePartialSearch || false;
 
     var filterQuery, lazyLoad;
 
@@ -86,6 +90,8 @@ function ProjectFinder(config) {
             } else if (width >= 992) {
                 self.columns(4);
             }
+
+            updateLazyLoad();
         };
 
         $( window ).resize(function () {
@@ -108,7 +114,9 @@ function ProjectFinder(config) {
          * project finder page. This flag is used to decide if about page of the project should be shown.
          * @returns {boolean}
          */
-        this.setTrafficFromProjectFinderFlag = function(){
+        this.setTrafficFromProjectFinderFlag = function(project){
+            selectedProjectId = project.transients.projectId;
+            updateHash();
             amplify.store('traffic-from-project-finder-page',true);
             // to execute default action of anchor tag, true must be returned.
             return true;
@@ -222,9 +230,20 @@ function ProjectFinder(config) {
      * @param selector
      */
     function scrollToView(selector) {
-        $("html, body").animate({
-            scrollTop: $(selector).offset().top
-        })
+        var offset = $(selector).offset()
+        if (offset) {
+            $("html, body").animate({
+                scrollTop: offset.top
+            })
+        }
+    }
+
+    function scrollToProject () {
+        if (selectedProjectId) {
+            scrollToView('#'+ selectedProjectId);
+            // clear selected project id when viewing a page, or filter querying
+            selectedProjectId = undefined;
+        }
     }
 
     pageWindow = new PageVM(config);
@@ -267,7 +286,8 @@ function ProjectFinder(config) {
             geoSearchJSON: JSON.stringify(geoSearch),
             skipDefaultFilters:fcConfig.showAllProjects,
             isWorldWide: isWorldWide,
-            q: ($('#pt-search').val() || '' ).toLowerCase()
+            projectId: selectedProjectId,
+            q: this.getQuery(true)
         };
 
         map.max =  perPage // Page size
@@ -284,6 +304,25 @@ function ProjectFinder(config) {
         }
 
         return map
+    };
+
+    this.getQuery = function (partialSearch) {
+        var query = ($('#pt-search').val() || '' ).toLowerCase();
+        if (enablePartialSearch) {
+            if (partialSearch && ((query.length >= 3) && (query.indexOf('*') == -1))) {
+                query = '*' + query + '*';
+            }
+        }
+
+        return query;
+    };
+
+    this.santitizeQuery = function (query) {
+        if (query) {
+            query = query.replace(/^\*/g, '').replace(/\*$/g, '');
+        }
+
+        return query;
     };
 
     /**
@@ -316,7 +355,7 @@ function ProjectFinder(config) {
                 self.pago.init(projectVMs);
                 pageWindow.filterViewModel.setFacets(data.facets || []);
                 updateLazyLoad();
-
+                setTimeout(scrollToProject, 500);
                 // Issue map search in parallel to 'standard' search
                 // standard search is required to drive facet display
                 self.doMapSearch(projectVMs);
@@ -334,7 +373,7 @@ function ProjectFinder(config) {
 
     function updateLazyLoad() {
         if (!lazyLoad) {
-            if (LazyLoad) {
+            if (typeof LazyLoad !== 'undefined') {
                 lazyLoad = new LazyLoad({
                     elements_selector: "img.lazy"
                 });
@@ -431,9 +470,10 @@ function ProjectFinder(config) {
 
     this.paginationInfo = function () {
         if (total > 0) {
-            var start = offset + 1
+            var start = offset + 1;
             var end = Math.min(total, start + perPage - 1);
-            return "Showing " + start + " to " + end + " of " + total + " " + (total > 1 ? "projects.": "project.");
+            var message = fcConfig.paginationMessage || 'Showing XXXX to YYYY of ZZZZ projects';
+            return message.replace('XXXX', start).replace('YYYY', end).replace('ZZZZ', total);
         } else {
             return "No projects found."
         }
@@ -518,7 +558,7 @@ function ProjectFinder(config) {
                             popup: generatePopup(project)
                         };
 
-                        if(project.coverage.centre && project.coverage.centre.length == 2) {
+                        if (project.coverage.centre && project.coverage.centre.length == 2) {
                             point.lat = parseFloat(project.coverage.centre[1]);
                             point.lng = parseFloat(project.coverage.centre[0]);
                         } else {
@@ -822,6 +862,7 @@ function ProjectFinder(config) {
     }
 
     function parseHash() {
+        pageWindow.filterViewModel.switchOffSearch(true);
         var hash = decodeURIComponent(window.location.hash.substr(1)).split("&");
 
         var params = {
@@ -847,9 +888,11 @@ function ProjectFinder(config) {
             }
         }
 
-
+        params.q = self.santitizeQuery(params.q);
         setGeoSearch(params.geoSearch);
         pageWindow.filterViewModel.setFilterQuery(params.fq);
+        offset = params.offset || offset;
+        selectedProjectId = params.projectId;
 
         if (fcConfig.associatedPrograms) {
             $.each(fcConfig.associatedPrograms, function (i, program) {
@@ -861,7 +904,13 @@ function ProjectFinder(config) {
         checkButton($("#pt-per-page"), params.max || '20');
         checkButton($("#pt-aus-world"), params.isWorldWide || 'false');
         
-        $('#pt-search').val(params.q).focus()
+        $('#pt-search').val(params.q).focus();
+        pageWindow.filterViewModel.switchOffSearch(false);
+    }
+
+    function updateHash() {
+        var hash = constructHash();
+        window.location.hash = hash;
     }
 
     function setGeoSearch(geoSearchHash) {
