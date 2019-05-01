@@ -83,10 +83,12 @@ class SiteController {
             }
             //siteService.injectLocationMetadata(site)
             def user = userService.getUser()
+            def mapFeatures = siteService.getMapFeatures(site)
+            println mapFeatures
 
             def result = [site               : site,
              //activities: activityService.activitiesForProject(id),
-             mapFeatures        : siteService.getMapFeatures(site),
+             mapFeatures        : mapFeatures,
              isSiteStarredByUser: userService.isSiteStarredByUser(user?.userId ?: "0", site.siteId)?.isSiteStarredByUser,
              user               : user
             ]
