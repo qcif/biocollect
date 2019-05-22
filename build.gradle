@@ -52,7 +52,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-autoconfigure"
     compile "org.grails:grails-core"
     compile "org.springframework.boot:spring-boot-starter-actuator"
-    compile "org.springframework.boot:spring-boot-starter-tomcat"
+    provided "org.springframework.boot:spring-boot-starter-tomcat"
 
     compile "org.grails:grails-dependencies"
     compile "org.grails:grails-logging"
@@ -106,7 +106,7 @@ dependencies {
     //ALA plugins
     //TODO Same namespace?
     compile "au.org.ala.plugins.grails:images-client-plugin:0.9-SNAPSHOT"
-    compile "org.grails.plugins:ala-auth:3.1.0"
+    compile "org.grails.plugins:ala-auth:3.0.2"
     runtime "org.grails.plugins:ala-bootstrap3:3.0.4"
     compile "org.grails.plugins:ala-admin-plugin:2.1"
     compile "org.grails.plugins:ala-map-plugin:3.0-SNAPSHOT"
