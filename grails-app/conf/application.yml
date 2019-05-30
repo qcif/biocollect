@@ -10,8 +10,6 @@ environments:
            config:
               locations:
                  - file:///data/biocollect/config/biocollect-config-grails3.properties
-           # It is used by redirect and others
-           serverURL: "${server.serverURL}"
         server:
            port: 8087
            serverURL: http://devt.ala.org.au:8087
@@ -32,18 +30,20 @@ environments:
              serverURL: https://biocollect-test.ala.org.au
         security:
            cas:
-               appServerName: https://biocollect-test.ala.org.au
+              appServerName: https://biocollect-test.ala.org.au
     production:
         grails:
-         config:
-             locations:
-                - file:///data/biocollect/config/biocollect-config.properties
-         serverURL: "http://www.ala.org.au/biocollect"
-         biocollect:
-                   system:
-                     email:
-                       replyTo: "biocollect<no-reply>@ala.org.au"
-                       sender: "biocollect-local@ala.org.au"
+            config:
+               locations:
+                  - file:///data/biocollect/config/biocollect-config.properties
+            security:
+              cas:
+                 appServerName: 'http://biocollect.ala.org.au'
+        biocollect:
+           system:
+              email:
+                replyTo: "biocollect<no-reply>@ala.org.au"
+                sender: "biocollect-local@ala.org.au"
 
 
 app:
@@ -72,7 +72,7 @@ security:
       logoutUrl: "https://auth.ala.org.au/cas/logout"
 
 #External URL
-
+debugUI: true
 aekosEnabled: true
 enableReporting: true
 bugherd:
@@ -84,6 +84,10 @@ download:
     threshold: 100
 notification:
   enabled: false
+# Specific configurations used by Biocollect
+facets:
+  flimit: 15
+
 
 aekosSubmission:
   url: "http://shared-uat.ecoinformatics.org.au:8080/shared-web/api/submission/create"
@@ -110,18 +114,16 @@ collectory:
 
 ecodata:
   baseURL: "https://ecodata.ala.org.au/"
-  service:
-    url: "${ecodata.baseURL}/ws"
+#  service:
+#    url: "${ecodata.baseURL}/ws"
 
-# Specific configurations used by Biocollect
-facets:
-  flimit: 15
 
 google:
   maps:
-    base: 'https://maps.googleapis.com/maps/api/js?key='
-    apiKey: 'AIzaSyA0HqqmZZT8n7bSeQ5rMZdhaCGTj4Kf_VA'
-    url:  "${google.maps.base}${google.maps.apiKey ?: 'You.Need.To.Add.A.Config.Property.Named.google.maps.apiKey'}"
+    base: "https://maps.googleapis.com/maps/api/js?key="
+    #apiKey:  "AIzaSyA0HqqmZZT8n7bSeQ5rMZdhaCGTj4Kf_VA"
+    #url: "${google.maps.base}${google.maps.apiKey ?: 'You.Need.To.Add.A.Config.Property.Named.google.maps.apiKey'}"
+
 #    geocode:
 #      url: "https://maps.googleapis.com/maps/api/geocode/json?"
 
@@ -138,8 +140,8 @@ lists:
 
 merit:
   baseURL: "https://fieldcapture-test.ala.org.au"
-  project:
-    url:  "${merit.baseURL}/project/index"
+#  project:
+#    url:  "${merit.baseURL}/project/index"
 
 mdba:
   baseUrl: "http://mdba-test.ala.org.au"
@@ -170,22 +172,22 @@ speciesConfiguration:
 
 spatial:
    baseURL: "https://spatial.ala.org.au/"
-   layersUrl: "${spatial.baseURL}/layers-service"
-   geoserverUrl: "${spatial.baseURL}/geoserver"
-   wms:
-     url: "${spatial.baseURL}/geoserver/ALA/wms?"
-     cache:
-         url: "${spatial.baseURL}/geoserver/gwc/service/wms?"
+#   layersUrl: "${spatial.baseURL}/layers-service"
+#   geoserverUrl: "${spatial.baseURL}/geoserver"
+#   wms:
+#     url: "${spatial.baseURL}/geoserver/ALA/wms?"
+#     cache:
+#         url: "${spatial.baseURL}/geoserver/gwc/service/wms?"
 
 
 
 
 upload:
    images:
-      url : "${grails.serverURL}/image?id="
+      #url : "${grails.serverURL}/image?id="
       path: "/data/${appName}/images/"
-   file:
-      url : "${grails.serverURL}/file?id="
+   #file:
+      #url : "${grails.serverURL}/file?id="
    path: "/data/${appName}/"
    extensions:
       blacklist : ['exe','js','php','asp','aspx','com','bat']
@@ -195,6 +197,7 @@ upload:
 grails:
     project:
       groupId: "au.org.ala"
+
     profile: web
     codegen:
         defaultPackage: au.org.ala.biocollect

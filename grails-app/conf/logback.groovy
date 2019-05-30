@@ -1,3 +1,4 @@
+import ch.qos.logback.classic.Level
 import grails.util.BuildSettings
 import grails.util.Environment
 import org.springframework.boot.logging.logback.ColorConverter
@@ -22,31 +23,17 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
-def targetDir = BuildSettings.TARGET_DIR
-if (Environment.isDevelopmentMode() && targetDir != null) {
-    appender("FULL_STACKTRACE", FileAppender) {
-        file = "${targetDir}/stacktrace.log"
-        append = true
-        encoder(PatternLayoutEncoder) {
-            pattern = "%level %logger - %msg%n"
-        }
-    }
-    logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
-}
+//def targetDir = BuildSettings.TARGET_DIR
+//if (Environment.isDevelopmentMode() && targetDir != null) {
+//    appender("FULL_STACKTRACE", FileAppender) {
+//        file = "${targetDir}/stacktrace.log"
+//        append = true
+//        encoder(PatternLayoutEncoder) {
+//            pattern = "%level %logger - %msg%n"
+//        }
+//    }
+//    logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
+//}
 
-
+logger("au.org.ala.biocollect",INFO, ['STDOUT'],false)
 root(ERROR, ['STDOUT'])
-
-[
-        (OFF): [],
-        (ERROR): [
-        ],
-        (WARN): [
-        ],
-        (INFO): [
-        ],
-        (DEBUG): [
-        ],
-        (TRACE): [
-        ]
-].each { level, names -> names.each { name -> logger(name, level) } }

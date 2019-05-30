@@ -1,17 +1,3 @@
-map.baseLayers = [
-        [
-                'code': 'minimal',
-                'displayText': 'Road map',
-                'default': false
-        ],
-        [
-                'code': 'worldimagery',
-                'displayText': 'Satellite',
-                'default': true
-        ]
-]
-
-settings.surveyMethods="fielddata.survey.methods"
 dataAccessMethods = [
         "oasrdfs",
         "oaordfs",
@@ -268,3 +254,17 @@ content.defaultOverriddenLabels = [
         ]
 ]
 
+map.baseLayers = [
+        [
+                'code': 'minimal',
+                'displayText': 'Road map',
+                'default': false
+        ],
+        [
+                'code': 'worldimagery',
+                'displayText': 'Satellite',
+                'default': true
+        ]
+]
+
+settings.surveyMethods="fielddata.survey.methods"

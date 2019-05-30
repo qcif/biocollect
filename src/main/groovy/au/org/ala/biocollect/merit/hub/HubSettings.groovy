@@ -1,12 +1,15 @@
 package au.org.ala.biocollect.merit.hub
 
 import org.grails.web.json.JSONObject
-import grails.converters.JSON
 
+import groovy.util.logging.Slf4j
 /**
  * The configuration for a hub.
  */
+
+@Slf4j
 class HubSettings extends JSONObject {
+
     static List SPECIAL_FACET_DATA_TYPES = ['Date', 'GeoMap']
     static Map ALL_DATA_TYPES = [
                                           presenceAbsence: "PresenceOrAbsence",

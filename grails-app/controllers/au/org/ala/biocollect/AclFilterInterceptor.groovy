@@ -193,6 +193,5 @@ class AclFilterInterceptor {
 
     void afterView() {
         // no-op
-        log.info('After view')
     }
 }

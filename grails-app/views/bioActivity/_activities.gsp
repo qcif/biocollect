@@ -383,17 +383,20 @@
     </div>
 </div>
 <!-- /ko -->
+
 <asset:script type="text/javascript">
     var activitiesAndRecordsViewModel, alaMap, results;
     function initialiseData(view) {
-        var user = '${user as grails.converters.JSON}',
-            configImageGallery;
+        var user = '${user ? user as grails.converters.JSON : "{}"}',
+        configImageGallery;
         if (user) {
             user = JSON.parse(user);
         } else {
             user = null;
         }
-        var columnConfig =${ hubConfig.getDataColumns(grailsApplication) as grails.converters.JSON};
+
+        var columnConfig =${ hubConfig.getDataColumns(grailsApplication) as grails.converters.JSON}
+
         activitiesAndRecordsViewModel = new ActivitiesAndRecordsViewModel('data-result-placeholder', view, user, false, false, ${doNotStoreFacetFilters?:false}, columnConfig);
         ko.applyBindings(activitiesAndRecordsViewModel, document.getElementById('survey-all-activities-and-records-content'));
         $('#dataMapTab').on('shown',function(){
