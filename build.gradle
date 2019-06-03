@@ -34,10 +34,11 @@ apply plugin:"org.grails.grails-plugin-publish"
 
 repositories {
     mavenLocal()
+    maven { url "https://repo.grails.org/grails/core" }
     maven { url "https://nexus.ala.org.au/content/groups/public/" }
 }
 
-def tomcatVersion = '7.0.55.2'
+//def tomcatVersion = '7.0.55.2'
 def metadataExtractorVersion = "2.6.2"
 def imgscalrVersion = "4.2"
 def httpmimeVersion = "4.2.1"
@@ -84,11 +85,11 @@ dependencies {
     testRuntime 'com.github.detro:phantomjsdriver:1.2.0'
 
     //JSON converter
-    compile 'org.grails.plugins:converters'
+    //compile 'org.grails.plugins:converters'
     runtime 'org.webjars:jquery:1.12.4'
     //mimic grails.config.locations like in Grails 2.x
     compile 'org.grails.plugins:external-config:2.0.0.RC1'
-    compile "org.grails.plugins:excel-import:3.0.0"
+    compile "org.grails.plugins:excel-import:3.0.2"
     compile "org.grails.plugins:excel-export:0.2.1"
     compile 'org.grails.plugins:grails-google-visualization:2.2.1'
     compile group: 'org.apache.poi', name: 'poi', version: '3.17'

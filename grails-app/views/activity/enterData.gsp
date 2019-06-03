@@ -233,6 +233,7 @@
 
 
 <g:render template="/shared/imagerViewerModal" model="[readOnly:false]"></g:render>
+
 <script type="text/javascript">
     function ActivityLevelData() {
         var self = this;
