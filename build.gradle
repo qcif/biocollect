@@ -30,7 +30,8 @@ apply plugin:"war"
 apply plugin:"org.grails.grails-web"
 apply plugin:"asset-pipeline"
 apply plugin:"org.grails.grails-gsp"
-//apply plugin:"org.grails.grails-plugin-publish"
+apply plugin:"org.grails.grails-plugin-publish"
+//apply plugin:"maven-publish"
 
 
 repositories {
@@ -137,18 +138,18 @@ assets {
 
 
 
-//grailsPublish {
-//    websiteUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
-//    issueTrackerUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect/issues'
-//    vcsUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
-//    githubSlug = 'AtlasOfLivingAustralia/biocollect'
-//    license {
-//        name = 'Apache-2.0'
-//    }
-//    title = "Biocollect"
-//    desc = ""
-//    developers = [TV: "Temi V",CG:"Chris Goldwin",QB:"Qifeng Bai"]
-//}
+grailsPublish {
+    websiteUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
+    issueTrackerUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect/issues'
+    vcsUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
+    githubSlug = 'AtlasOfLivingAustralia/biocollect'
+    license {
+        name = 'Apache-2.0'
+    }
+    title = "Biocollect"
+    desc = ""
+    developers = [TV: "Temi V",CG:"Chris Goldwin",QB:"Qifeng Bai"]
+}
 
 publishing {
     repositories {
