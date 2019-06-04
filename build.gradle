@@ -23,7 +23,6 @@ plugins {
 version "5.0-SNAPSHOT"
 group "au.org.ala"
 
-apply plugin:'java'
 apply plugin:"eclipse"
 apply plugin:"idea"
 apply plugin:"war"
@@ -31,7 +30,6 @@ apply plugin:"org.grails.grails-web"
 apply plugin:"asset-pipeline"
 apply plugin:"org.grails.grails-gsp"
 apply plugin:"org.grails.grails-plugin-publish"
-//apply plugin:"maven-publish"
 
 
 repositories {
