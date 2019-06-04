@@ -1,5 +1,4 @@
-import grails.util.Environment
-
+import static org.springframework.boot.gradle.SpringBootPluginExtension.LayoutType.*
 
 buildscript {
     repositories {
@@ -18,8 +17,6 @@ plugins {
     id 'war'
 }
 
-
-
 version "5.0-SNAPSHOT"
 group "au.org.ala"
 
@@ -29,7 +26,8 @@ apply plugin:"war"
 apply plugin:"org.grails.grails-web"
 apply plugin:"asset-pipeline"
 apply plugin:"org.grails.grails-gsp"
-apply plugin:"org.grails.grails-plugin-publish"
+apply from: 'https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_publish.gradle'
+//apply plugin:"org.grails.grails-plugin-publish"
 
 
 repositories {
@@ -113,7 +111,12 @@ dependencies {
     runtime "org.grails.plugins:ala-bootstrap3:3.0.4"
     compile "org.grails.plugins:ala-admin-plugin:2.1"
     compile "org.grails.plugins:ala-map-plugin:3.0-SNAPSHOT"
-    compile "ecodata.client.plugin:ecodata-client-plugin:3.0-SNAPSHOT"
+    compile "org.grails.plugins:ecodata-client-plugin:3.0-SNAPSHOT"
+}
+
+springBoot {
+    buildInfo()
+    layout = WAR
 }
 
 
@@ -136,47 +139,47 @@ assets {
 
 
 
-grailsPublish {
-    websiteUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
-    issueTrackerUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect/issues'
-    vcsUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
-    githubSlug = 'AtlasOfLivingAustralia/biocollect'
-    license {
-        name = 'Apache-2.0'
-    }
-    title = "Biocollect"
-    desc = ""
-    developers = [TV: "Temi V",CG:"Chris Goldwin",QB:"Qifeng Bai"]
-}
-
-publishing {
-    repositories {
-        maven {
-            name 'Nexus'
-            url "https://nexus.ala.org.au/content/repositories/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
-            credentials {
-                username = System.getenv('TRAVIS_DEPLOY_USERNAME')
-                password = System.getenv('TRAVIS_DEPLOY_PASSWORD')
-            }
-        }
-    }
-    publications {
-        mavenJar(MavenPublication) {
-            pom.withXml {
-                def pomNode = asNode()
-                pomNode.dependencyManagement.replaceNode {}
-
-                // simply remove dependencies without a version
-                // version-less dependencies are handled with dependencyManagement
-                // see https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/8 for more complete solutions
-                pomNode.dependencies.dependency.findAll {
-                    it.version.text().isEmpty()
-                }.each {
-                    it.replaceNode {}
-                }
-            }
-            from components.java
-
-        }
-    }
-}
+//grailsPublish {
+//    websiteUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
+//    issueTrackerUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect/issues'
+//    vcsUrl = 'https://github.com/AtlasOfLivingAustralia/biocollect'
+//    githubSlug = 'AtlasOfLivingAustralia/biocollect'
+//    license {
+//        name = 'Apache-2.0'
+//    }
+//    title = "Biocollect"
+//    desc = ""
+//    developers = [TV: "Temi V",CG:"Chris Goldwin",QB:"Qifeng Bai"]
+//}
+//
+//publishing {
+//    repositories {
+//        maven {
+//            name 'Nexus'
+//            url "https://nexus.ala.org.au/content/repositories/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
+//            credentials {
+//                username = System.getenv('TRAVIS_DEPLOY_USERNAME')
+//                password = System.getenv('TRAVIS_DEPLOY_PASSWORD')
+//            }
+//        }
+//    }
+//    publications {
+//        mavenJar(MavenPublication) {
+//            pom.withXml {
+//                def pomNode = asNode()
+//                pomNode.dependencyManagement.replaceNode {}
+//
+//                // simply remove dependencies without a version
+//                // version-less dependencies are handled with dependencyManagement
+//                // see https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/8 for more complete solutions
+//                pomNode.dependencies.dependency.findAll {
+//                    it.version.text().isEmpty()
+//                }.each {
+//                    it.replaceNode {}
+//                }
+//            }
+//            from components.java
+//
+//        }
+//    }
+//}
