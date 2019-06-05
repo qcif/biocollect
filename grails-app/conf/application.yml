@@ -106,7 +106,7 @@ aekosMintedDoi:
 acsaUrl: 'http://csna.gaiaresources.com.au/wordpress/'
 
 bie:
-  baseURL: "http://bie.ala.org.au"
+  baseURL: "https://bie.ala.org.au"
 
 biocache:
   baseURL: "https://biocache.ala.org.au"

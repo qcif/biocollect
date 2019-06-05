@@ -14,8 +14,8 @@
  */
 
 package au.org.ala.biocollect.merit
-import grails.converters.JSON
 import groovyx.net.http.HTTPBuilder
+import grails.converters.JSON
 import groovyx.net.http.Method
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntity
@@ -170,7 +170,8 @@ class WebService {
             }
             conn.setRequestProperty(ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             def json = responseText(conn)
-            return JSON.parse(json)
+            def result = JSON.parse(json)
+            return result
         } catch (ConverterException e) {
             def error = ['error': "Failed to parse json. ${e.getClass()} ${e.getMessage()} URL= ${url}."]
             log.error error

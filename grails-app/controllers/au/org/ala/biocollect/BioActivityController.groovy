@@ -199,6 +199,9 @@ class BioActivityController {
     def edit(String id) {
         Map model = editActivity(id)
         model?.title = messageSource.getMessage('record.edit.title', [].toArray(), '', Locale.default)
+        //May relates to the known grails.converter.JSON issue
+        //Remove this seem-useless statement may causes issue
+        model.toString()
         model
     }
 

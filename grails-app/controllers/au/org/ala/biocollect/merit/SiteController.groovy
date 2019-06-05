@@ -483,9 +483,10 @@ class SiteController {
                 values[k] = v //reMarshallRepeatingObjects(v);
             }
         }
-        log.debug(values as JSON).toString()
+
         //Compatible with previous records without visibility field
         boolean privateSite = values['visibility'] ? (values['visibility'] == 'private' ? true : false) : false
+
 
         if(privateSite){
             //Do not check permission if site is private

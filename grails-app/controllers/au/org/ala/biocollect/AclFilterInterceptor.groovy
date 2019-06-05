@@ -28,7 +28,10 @@ class AclFilterInterceptor {
         Class controllerClass = controller?.clazz
         if (!controllerClass)
             return true
+
+
         def method = controllerClass.getMethod(actionName?:"index", [] as Class[])
+
         def roles = roleService.getAugmentedRoles()
         def userId = userService.getCurrentUserId(request)
         def projectId = params.projectId
