@@ -9,7 +9,7 @@
                         <h2 class="strong">Step 2 of 7 - Set visibility constraints on survey data</h2>
                     </div>
                     <div class="span2 text-right">
-                        <g:render template="../projectActivity/status"/>
+                        <g:render template="/projectActivity/status"/>
                     </div>
                 </div>
 
@@ -37,7 +37,7 @@
                    </div>
 
                 </div>
-                <g:render template="../projectActivity/indexingNote"/>
+                <g:render template="/projectActivity/indexingNote"/>
             <!-- /ko -->
         <!-- /ko -->
 </div>

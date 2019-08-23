@@ -2,7 +2,7 @@ package au.org.ala.biocollect.merit
 
 import groovy.json.JsonSlurper
 import org.apache.commons.lang.StringUtils
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import grails.web.servlet.mvc.GrailsParameterMap
 
 import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletResponse
