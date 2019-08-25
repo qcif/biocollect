@@ -1,6 +1,7 @@
+dist: trusty
 language: groovy
 jdk:
-- oraclejdk8
+- openjdk8
 
 #script:
 #  - jdk_switcher use openjdk8
