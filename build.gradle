@@ -78,7 +78,11 @@ dependencies {
     compile "org.imgscalr:imgscalr-lib:${imgscalrVersion}"
     compile "org.apache.httpcomponents:httpmime:${httpmimeVersion}"
     compile "com.vividsolutions:jts:${jtsVersion}"
-    compile "org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}"
+    //compile "org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}"
+    compile ("org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}") {
+        exclude group: 'javax.media', module: 'jai_core'
+    }
+
     compile "joda-time:joda-time:2.3"
     compile "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
     compile "org.apache.httpcomponents:httpcore:4.4.1"
