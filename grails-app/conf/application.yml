@@ -14,8 +14,8 @@ environments:
                  - file:///data/biocollect/config/biocollect-config-grails3.properties
         #system level config
         server:
-           port: 8087
-           serverURL: http://devt.ala.org.au:8087
+           port: 8085
+           serverURL: http://devt.ala.org.au:8085
 #        security:
 #          cas:
 #             appServerName: 'http://devt.ala.org.au:8087'
@@ -138,7 +138,7 @@ google:
 
 
 headerAndFooter:
-  baseURL: "https://www.ala.org.au/commonui-bs2-v2/commonui-bs2"
+  baseURL: "https://www.ala.org.au/commonui-bs2" #"https://www.ala.org.au/commonui-bs2-v2/commonui-bs2"
 
 images:
   baseURL: "https://images.ala.org.au"

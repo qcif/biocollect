@@ -40,7 +40,7 @@ class ProjectController {
     PdfGenerationService pdfGenerationService
     UtilService utilService
 
-    grails.core.GrailsApplication grailsApplication
+    //def grailsApplication
 
     static defaultAction = "index"
     static ignore = ['action','controller','id']
